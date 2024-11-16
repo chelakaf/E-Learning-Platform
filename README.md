@@ -1,19 +1,42 @@
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+E-learning Platform
+<br>
+• Admin:
+<br>
+o Manage users (add, update, delete instructor, student, and admin accounts).
+<br>
+o Manage course content, pricing, and schedules.
+<br>
+o Track course enrollments, payments, and completion rates.
+<br>
+o Assign roles and permissions to instructors and students.
+<br>
+o Generate reports on course performance and student progress.
+<br>
+• Instructor:
+<br>
+o Create and manage course content, assignments, and exams.
+<br>
+o Track student progres
+<br>
 
-import java.util.*;
 
-public class ELearningPlatform extends Application {
+Code:
+<br>
 
-    // Mock databases
+    import javafx.application.Application;
+    import javafx.scene.Scene;
+    import javafx.scene.control.*;
+    import javafx.scene.layout.VBox;
+    import javafx.stage.Stage;
+    import java.util.*;
+
+    public class ELearningPlatform extends Application {
     private static Map<String, User> users = new HashMap<>(); // username -> User object
     private static List<Course> courses = new ArrayList<>();
     private static Map<String, List<Course>> enrollments = new HashMap<>(); // username -> enrolled courses
     private static Map<String, Double> payments = new HashMap<>(); // username -> payment amount
 
+     // Mock databases
     @Override
     public void start(Stage primaryStage) {
         VBox root = new VBox(10);
@@ -194,3 +217,4 @@ public class ELearningPlatform extends Application {
         launch(args);
     }
 }
+*/
