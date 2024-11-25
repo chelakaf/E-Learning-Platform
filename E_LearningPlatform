@@ -1,0 +1,254 @@
+// This is a slightly modified version and updated version of the previous software with some additional features
+package com.example.e_learningplatform2;
+
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class E_LearningPlatform2 extends Application {
+
+    private static final Map<String, User> users = new HashMap<>();
+    private Stage primaryStage;
+    private String selectedRole;
+    private boolean isDarkMode = false; // Light mode by default
+
+    public static void main(String[] args) {
+        users.put("admin", new User("admin", "admin123", "Admin"));
+        users.put("instructor", new User("instructor", "inst123", "Instructor"));
+        users.put("student", new User("student", "stud123", "Student"));
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        showModeSelectionScreen();
+    }
+
+    private void showModeSelectionScreen() {
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label titleLabel = new Label("E-Learning Platform");
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        Label modePromptLabel = new Label("Choose a Theme:");
+        ToggleGroup themeToggleGroup = new ToggleGroup();
+
+        RadioButton lightModeRadioButton = new RadioButton("Light Mode");
+        lightModeRadioButton.setToggleGroup(themeToggleGroup);
+        lightModeRadioButton.setSelected(true); // Default to light mode
+
+        RadioButton darkModeRadioButton = new RadioButton("Dark Mode");
+        darkModeRadioButton.setToggleGroup(themeToggleGroup);
+
+        Button proceedButton = new Button("Proceed");
+        proceedButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        proceedButton.setOnAction(e -> {
+            isDarkMode = darkModeRadioButton.isSelected();
+            showRoleSelectionScreen();
+        });
+
+        root.getChildren().addAll(titleLabel, modePromptLabel, lightModeRadioButton, darkModeRadioButton, proceedButton);
+
+        Scene scene = new Scene(root);
+        applyTheme(scene);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("E-Learning Platform - Theme Selection");
+        primaryStage.show();
+    }
+
+    private void showRoleSelectionScreen() {
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(20));
+
+        VBox roleSelection = new VBox(15);
+        roleSelection.setAlignment(Pos.CENTER);
+
+        Label titleLabel = new Label("E-Learning Platform");
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        Button adminButton = createRoleButton("Admin", "#4CAF50");
+        Button instructorButton = createRoleButton("Instructor", "#2196F3");
+        Button studentButton = createRoleButton("Student", "#FFC107");
+
+        roleSelection.getChildren().addAll(titleLabel, adminButton, instructorButton, studentButton);
+
+        Label dateTimeLabel = createDateTimeLabel();
+
+        root.setTop(dateTimeLabel);
+        root.setCenter(roleSelection);
+
+        Scene scene = new Scene(root);
+        applyTheme(scene);
+        primaryStage.setScene(scene);
+    }
+
+    private Button createRoleButton(String role, String color) {
+        Button button = new Button(role + " Login");
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
+        button.setOnAction(e -> {
+            selectedRole = role;
+            showLoginScreen();
+        });
+        return button;
+    }
+
+    private void applyTheme(Scene scene) {
+        if (isDarkMode) {
+            scene.getRoot().setStyle("-fx-background-color: #333; -fx-text-fill: white;");
+            for (javafx.scene.Node node : ((Pane) scene.getRoot()).getChildrenUnmodifiable()) {
+                if (node instanceof Label) {
+                    ((Label) node).setStyle("-fx-text-fill: white;");
+                } else if (node instanceof Button) {
+                    ((Button) node).setStyle("-fx-background-color: #555; -fx-text-fill: white;");
+                }
+            }
+        } else {
+            scene.getRoot().setStyle("-fx-background-color: white; -fx-text-fill: black;");
+            for (javafx.scene.Node node : ((Pane) scene.getRoot()).getChildrenUnmodifiable()) {
+                if (node instanceof Label) {
+                    ((Label) node).setStyle("-fx-text-fill: black;");
+                } else if (node instanceof Button) {
+                    ((Button) node).setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+                }
+            }
+        }
+    }
+
+    private Label createDateTimeLabel() {
+        Label dateTimeLabel = new Label();
+        dateTimeLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            dateTimeLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+        return dateTimeLabel;
+    }
+
+    private void showLoginScreen() {
+        BorderPane root = new BorderPane();
+        VBox loginBox = new VBox(15);
+        loginBox.setAlignment(Pos.CENTER);
+        loginBox.setPadding(new Insets(20));
+
+        Label titleLabel = new Label(selectedRole + " Login");
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Username");
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+
+        Button loginButton = new Button("Login");
+        loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        loginButton.setOnAction(e -> {
+            String username = usernameField.getText();
+            String password = passwordField.getText();
+            User user = users.get(username);
+            if (user != null && user.password.equals(password) && user.role.equals(selectedRole)) {
+                switch (selectedRole) {
+                    case "Admin" -> showAdminDashboard();
+                    case "Instructor" -> showInstructorDashboard();
+                    case "Student" -> showStudentDashboard();
+                }
+            } else {
+                showAlert("Login Failed", "Invalid username or password.");
+            }
+        });
+
+        Button backButton = new Button("Back");
+        backButton.setStyle("-fx-background-color: #FF0000; -fx-text-fill: white;");
+        backButton.setOnAction(e -> showRoleSelectionScreen());
+
+        loginBox.getChildren().addAll(titleLabel, usernameField, passwordField, loginButton, backButton);
+        root.setTop(createDateTimeLabel());
+        root.setCenter(loginBox);
+
+        Scene scene = new Scene(root);
+        applyTheme(scene);
+        primaryStage.setScene(scene);
+    }
+
+    private void showAdminDashboard() {
+        displayDashboard("Admin Dashboard", new String[]{"Manage Users", "Manage Courses", "Track Enrollments", "Generate Reports"});
+    }
+
+    private void showInstructorDashboard() {
+        displayDashboard("Instructor Dashboard", new String[]{"Create Course", "Manage Assignments", "Track Progress", "Manage Profile"});
+    }
+
+    private void showStudentDashboard() {
+        displayDashboard("Student Dashboard", new String[]{"Enroll in Course", "View Progress", "Make Payment", "Manage Account"});
+    }
+
+    private void displayDashboard(String title, String[] options) {
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(20));
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        root.setTop(titleLabel);
+        BorderPane.setAlignment(titleLabel, Pos.TOP_CENTER);
+
+        TilePane tilePane = new TilePane();
+        tilePane.setHgap(10);
+        tilePane.setVgap(10);
+        tilePane.setAlignment(Pos.CENTER);
+        tilePane.setPadding(new Insets(20));
+        tilePane.setPrefColumns(2);
+
+        for (String option : options) {
+            Button button = new Button(option);
+            button.setStyle("-fx-background-color: #008CBA; -fx-text-fill: white;");
+            button.setMinSize(150, 100);
+            tilePane.getChildren().add(button);
+        }
+
+        root.setCenter(tilePane);
+
+        Button logoutButton = new Button("Logout");
+        logoutButton.setStyle("-fxba-ckground-color: #ff0000; -fx-text-fill: white;");
+        logoutButton.setOnAction(e -> showRoleSelectionScreen());
+        root.setBottom(logoutButton);
+        BorderPane.setAlignment(logoutButton, Pos.BOTTOM_RIGHT);
+
+        root.setTop(createDateTimeLabel());
+
+        Scene scene = new Scene(root);
+        applyTheme(scene);
+        primaryStage.setScene(scene);
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    static class User {
+        String username, password, role;
+
+        User(String username, String password, String role) {
+            this.username = username;
+            this.password = password;
+            this.role = role;
+        }
+    }
+}
